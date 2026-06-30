@@ -85,7 +85,7 @@ Un egg prêt à l'emploi est fourni : **`egg-chess-leaderboard.json`**.
    |---------------------|---------------------------------------------------------|
    | `DISCORD_TOKEN`     | **obligatoire** — token du bot                          |
    | `GIT_ADDRESS`       | URL du repo à cloner                                     |
-   | `BRANCH`            | branche à cloner                                         |
+   | `BRANCH`            | branche à cloner (défaut `main`)                        |
    | `GIT_USERNAME` / `GIT_ACCESS_TOKEN` | identifiants si le repo est privé       |
    | `AUTO_UPDATE`       | `1` = `git pull` à chaque démarrage                     |
    | `PY_FILE`           | fichier lancé (défaut `bot.py`)                         |

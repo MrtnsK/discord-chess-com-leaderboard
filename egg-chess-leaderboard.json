@@ -53,7 +53,7 @@
             "name": "Git Branch",
             "description": "Branche a cloner.",
             "env_variable": "BRANCH",
-            "default_value": "claude/pelican-dev-deploy-ww1x5j",
+            "default_value": "main",
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string",
