@@ -6,14 +6,21 @@ Règles importantes de l'API :
   - User-Agent recommandé avec un contact
 """
 
+import os
 import asyncio
 import aiohttp
 
 BASE = "https://api.chess.com/pub"
 
-# ⚠️ Mets ton vrai contact ici (email / pseudo discord). En cas de souci,
-# chess.com pourra te prévenir au lieu de te bloquer direct.
-USER_AGENT = "discord-chess-leaderboard/1.0 (contact: TON_EMAIL_OU_PSEUDO)"
+# Contact recommandé par l'API chess.com (email / pseudo discord). En cas de
+# souci, chess.com peut te prévenir au lieu de te bloquer direct.
+# Configurable via la variable d'environnement CHESSCOM_CONTACT (ou
+# CHESSCOM_USER_AGENT pour surcharger tout le User-Agent).
+_CONTACT = os.environ.get("CHESSCOM_CONTACT", "TON_EMAIL_OU_PSEUDO")
+USER_AGENT = os.environ.get(
+    "CHESSCOM_USER_AGENT",
+    f"discord-chess-leaderboard/1.0 (contact: {_CONTACT})",
+)
 
 
 class ChessComClient:

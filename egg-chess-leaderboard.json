@@ -1,0 +1,153 @@
+{
+    "_comment": "Pelican egg pour le bot Discord de classements chess.com.",
+    "meta": {
+        "version": "PLCN_v1",
+        "update_url": null
+    },
+    "exported_at": "2026-06-30T12:00:00+00:00",
+    "name": "Chess.com Leaderboard Bot",
+    "author": "kevinmartins4242@gmail.com",
+    "description": "Bot Discord qui affiche 3 classements chess.com (parties de la semaine, Elo rapide, victoires entre membres), mis a jour automatiquement a 00h/06h/12h/18h. Slash commands /join /leave /members /setup /refresh. Persistance SQLite.",
+    "features": null,
+    "docker_images": {
+        "Python 3.12": "ghcr.io/pelican-eggs/yolks:python_3.12",
+        "Python 3.11": "ghcr.io/pelican-eggs/yolks:python_3.11"
+    },
+    "file_denylist": [],
+    "startup": "if [ -d .git ] && [ \"${AUTO_UPDATE}\" = \"1\" ]; then echo 'Mise a jour du repo...'; git pull; fi; if [ -f \"${REQUIREMENTS_FILE}\" ]; then echo 'Installation des dependances...'; pip install -U -r \"${REQUIREMENTS_FILE}\"; fi; python /home/container/${PY_FILE}",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"Connecté en tant que\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Egg d'installation : clone le repo du bot dans /mnt/server.\n# Image d'install : ghcr.io/pelican-eggs/installers:debian\n\napt update\napt install -y git curl jq file unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\n# Construit l'URL (gere les repos prives via username + token)\nif [ -n \"${GIT_USERNAME}\" ] && [ -n \"${GIT_ACCESS_TOKEN}\" ]; then\n    GITURL=\"https://${GIT_USERNAME}:${GIT_ACCESS_TOKEN}@$(echo \"${GIT_ADDRESS}\" | sed 's~.*://~~')\"\nelse\n    GITURL=\"${GIT_ADDRESS}\"\nfi\n\nif [ -z \"${GIT_ADDRESS}\" ]; then\n    echo \"Aucune GIT_ADDRESS fournie, etape de clonage ignoree.\"\nelse\n    echo \"Clonage de ${GIT_ADDRESS} ...\"\n    if [ -z \"${BRANCH}\" ]; then\n        git clone \"${GITURL}\" .\n    else\n        git clone --single-branch --branch \"${BRANCH}\" \"${GITURL}\" .\n    fi\nfi\n\necho \"-----------------------------------------\"\necho \"Installation terminee.\"\necho \"-----------------------------------------\"\n",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Discord Bot Token",
+            "description": "Token de ton application Discord (onglet Bot). OBLIGATOIRE.",
+            "env_variable": "DISCORD_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Git Repository URL",
+            "description": "URL du repo a cloner a l'installation.",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "https://github.com/MrtnsK/discord-chess-com-leaderboard.git",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Git Branch",
+            "description": "Branche a cloner.",
+            "env_variable": "BRANCH",
+            "default_value": "claude/pelican-dev-deploy-ww1x5j",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Git Username (repo prive)",
+            "description": "Nom d'utilisateur GitHub, uniquement si le repo est prive.",
+            "env_variable": "GIT_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Git Access Token (repo prive)",
+            "description": "Personal Access Token GitHub, uniquement si le repo est prive.",
+            "env_variable": "GIT_ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Auto-update au demarrage",
+            "description": "1 = git pull a chaque demarrage du serveur, 0 = non.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "string"
+        },
+        {
+            "name": "Fichier Python a lancer",
+            "description": "Point d'entree du bot.",
+            "env_variable": "PY_FILE",
+            "default_value": "bot.py",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Fichier requirements",
+            "description": "Fichier de dependances pip installe au demarrage.",
+            "env_variable": "REQUIREMENTS_FILE",
+            "default_value": "requirements.txt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Discord Guild ID (sync dev)",
+            "description": "Optionnel : id du serveur Discord pour un sync instantane des slash commands (utile en test). Laisse vide pour un sync global.",
+            "env_variable": "GUILD_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Fuseau horaire",
+            "description": "Fuseau utilise pour les heures de maj (00h/06h/12h/18h). Ex: Europe/Paris.",
+            "env_variable": "TZ_NAME",
+            "default_value": "Europe/Paris",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Chemin base SQLite",
+            "description": "Chemin du fichier SQLite. Relatif a /home/container (persistant). Defaut: leaderboard.db.",
+            "env_variable": "DB_PATH",
+            "default_value": "leaderboard.db",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Contact chess.com (User-Agent)",
+            "description": "Email ou pseudo mis dans le User-Agent envoye a l'API chess.com (recommande).",
+            "env_variable": "CHESSCOM_CONTACT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        }
+    ]
+}
