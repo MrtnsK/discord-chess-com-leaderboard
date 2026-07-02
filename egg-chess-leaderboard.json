@@ -7,7 +7,7 @@
     "exported_at": "2026-06-30T12:00:00+00:00",
     "name": "Chess.com Leaderboard Bot",
     "author": "kevinmartins4242@gmail.com",
-    "description": "Bot Discord qui affiche 3 classements chess.com (parties de la semaine, Elo rapide, victoires entre membres), mis a jour automatiquement a 00h/06h/12h/18h. Slash commands /join /leave /members /setup /refresh. Persistance SQLite.",
+    "description": "Bot Discord qui affiche 4 classements chess.com (parties de la semaine, Elo rapide, victoires entre membres, progression), avec recap hebdo et annonces de matchs, mis a jour automatiquement a 00h/06h/12h/18h. Slash commands /join /leave /members /stats /vs /setup /refresh /config. Persistance SQLite.",
     "features": null,
     "docker_images": {
         "Python 3.12": "ghcr.io/pelican-eggs/yolks:python_3.12",
@@ -143,6 +143,26 @@
             "name": "Contact chess.com (User-Agent)",
             "description": "Email ou pseudo mis dans le User-Agent envoye a l'API chess.com (recommande).",
             "env_variable": "CHESSCOM_CONTACT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "string"
+        },
+        {
+            "name": "Profondeur de /vs (mois)",
+            "description": "Nombre de mois d'archives parcourus par la commande /vs.",
+            "env_variable": "VS_MONTHS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "string"
+        },
+        {
+            "name": "Types de parties comptees",
+            "description": "Filtre par defaut des parties comptees dans les classements (ex: rapid ou rapid,blitz). Vide = toutes. Modifiable en jeu via /config timeclass.",
+            "env_variable": "GAMES_TIME_CLASSES",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,

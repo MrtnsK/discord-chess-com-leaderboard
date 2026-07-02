@@ -1,14 +1,21 @@
 # Chess.com Leaderboard Bot
 
-Bot Discord qui affiche 3 classements dynamiques à partir de la PubAPI chess.com,
+Bot Discord qui affiche 4 classements dynamiques à partir de la PubAPI chess.com,
 mis à jour automatiquement à **00h / 06h / 12h / 18h** :
 
 1. 🎮 **Parties jouées cette semaine** (+ % de victoires sur la période)
-2. ⚡ **Elo rapide** (`chess_rapid`)
+2. ⚡ **Elo rapide** (`chess_rapid`, avec le delta de la semaine)
 3. 🏆 **Victoires de la semaine** comptées uniquement contre d'autres membres inscrits
+4. 📈 **Progression Elo de la semaine**
 
-Seuls les membres inscrits via `/join` apparaissent. Les classements **éditent le
-même message** à chaque maj (pas de spam).
+En plus des classements (qui **éditent le même message** à chaque maj, pas de
+spam), le bot poste dans le même salon :
+
+- un **récap hebdo** figé chaque lundi (👑 vainqueur de la semaine écoulée) ;
+- une **annonce** pour chaque nouvelle partie jouée **entre membres inscrits**
+  (⚔️ X a battu Y), sans doublon.
+
+Seuls les membres inscrits via `/join` apparaissent.
 
 ## 1. Créer l'application Discord
 
@@ -32,13 +39,16 @@ python bot.py
 
 ## 3. Utilisation
 
-| Commande            | Qui    | Effet                                            |
-|---------------------|--------|--------------------------------------------------|
-| `/join <pseudo>`    | tous   | s'inscrire avec son pseudo Chess.com             |
-| `/leave`            | tous   | se retirer                                       |
-| `/members`          | tous   | liste des inscrits                               |
-| `/setup <salon>`    | admin  | choisit le salon et poste les 3 classements      |
-| `/refresh`          | admin  | force une mise à jour immédiate                  |
+| Commande                   | Qui    | Effet                                              |
+|----------------------------|--------|----------------------------------------------------|
+| `/join <pseudo>`           | tous   | s'inscrire avec son pseudo Chess.com               |
+| `/leave`                   | tous   | se retirer                                         |
+| `/members`                 | tous   | liste des inscrits                                 |
+| `/stats [membre]`          | tous   | carte de stats (Elo, bilan de la semaine, puzzles) |
+| `/vs <adversaire>`         | tous   | bilan face à un autre membre (6 derniers mois)     |
+| `/setup <salon>`           | admin  | choisit le salon et poste les 4 classements        |
+| `/refresh`                 | admin  | force une mise à jour immédiate                    |
+| `/config timeclass <val>`  | admin  | types de parties comptées (`rapid,blitz`… ou `all`)|
 
 Ordre typique : `/setup #classements`, puis chacun fait `/join`.
 
@@ -94,6 +104,8 @@ Un egg prêt à l'emploi est fourni : **`egg-chess-leaderboard.json`**.
    | `TZ_NAME`           | fuseau horaire des maj (défaut `Europe/Paris`)         |
    | `DB_PATH`           | base SQLite (défaut `leaderboard.db`)                   |
    | `CHESSCOM_CONTACT`  | contact mis dans le User-Agent chess.com                |
+   | `VS_MONTHS`         | profondeur de `/vs` en mois (défaut `6`)                |
+   | `GAMES_TIME_CLASSES`| filtre par défaut des parties comptées (ex. `rapid`)   |
 
 4. **Persistance** : la base SQLite vit dans `/home/container` (le volume du
    serveur), donc elle survit aux redémarrages — rien à configurer.
@@ -115,7 +127,17 @@ Un egg prêt à l'emploi est fourni : **`egg-chess-leaderboard.json`**.
 ## Notes API chess.com
 
 - Read-only, sans clé. Requêtes faites **en série** (sinon erreur 429).
+- Les archives mensuelles sont mises en cache (ETag/`If-None-Match`, stocké
+  dans la base SQLite) : la plupart des refreshs ne retéléchargent rien.
 - Le rating "rapide" regroupe tous les contrôles rapides (10|0, 15|10…). Pour du
   10|0 strict il faudrait parser les parties — non implémenté ici.
-- Réglages rapides dans `leaderboards.py` : `GAMES_TIME_CLASSES` pour filtrer les
-  parties prises en compte (boards 1 et 3) par type, ex. `{"rapid"}`.
+- Les types de parties comptées (boards 1, 3 et 4, annonces) se règlent avec
+  `/config timeclass rapid,blitz` (ou `all`), à défaut la variable d'env
+  `GAMES_TIME_CLASSES`.
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
