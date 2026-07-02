@@ -27,6 +27,8 @@ Seuls les membres inscrits via `/join` apparaissent.
 
 ## 2. Installation locale
 
+Prérequis : Python ≥ 3.9.
+
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -45,12 +47,17 @@ python bot.py
 | `/leave`                   | tous   | se retirer                                         |
 | `/members`                 | tous   | liste des inscrits                                 |
 | `/stats [membre]`          | tous   | carte de stats (Elo, bilan de la semaine, puzzles) |
-| `/vs <adversaire>`         | tous   | bilan face à un autre membre (6 derniers mois)     |
+| `/vs <adversaire>`         | tous   | bilan face à un autre membre (`VS_MONTHS`, 6 mois) |
 | `/setup <salon>`           | admin  | choisit le salon et poste les 4 classements        |
 | `/refresh`                 | admin  | force une mise à jour immédiate                    |
 | `/config timeclass <val>`  | admin  | types de parties comptées (`rapid,blitz`… ou `all`)|
 
 Ordre typique : `/setup #classements`, puis chacun fait `/join`.
+
+Au **premier lancement**, le bot s'initialise silencieusement : pas de récap
+(la semaine précédente n'a pas été suivie), pas d'annonces pour les parties
+déjà jouées (elles sont marquées comme connues), et les deltas Elo
+apparaissent à partir du refresh suivant. Tout démarre normalement ensuite.
 
 ## 4. Hébergement
 
@@ -131,9 +138,10 @@ Un egg prêt à l'emploi est fourni : **`egg-chess-leaderboard.json`**.
   dans la base SQLite) : la plupart des refreshs ne retéléchargent rien.
 - Le rating "rapide" regroupe tous les contrôles rapides (10|0, 15|10…). Pour du
   10|0 strict il faudrait parser les parties — non implémenté ici.
-- Les types de parties comptées (boards 1, 3 et 4, annonces) se règlent avec
-  `/config timeclass rapid,blitz` (ou `all`), à défaut la variable d'env
-  `GAMES_TIME_CLASSES`.
+- Les types de parties comptées (boards 1 et 3, récap, annonces) se règlent
+  avec `/config timeclass rapid,blitz` (ou `all`), à défaut la variable d'env
+  `GAMES_TIME_CLASSES`. Les boards Elo et Progression suivent toujours le
+  rating `chess_rapid`, indépendamment de ce filtre.
 
 ## Tests
 
