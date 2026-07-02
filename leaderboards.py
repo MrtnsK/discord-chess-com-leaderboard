@@ -227,6 +227,8 @@ def rating_of(stats, category):
 
 
 def puzzle_rating(stats):
+    # La PubAPI n'expose que highest/lowest pour les puzzles, jamais le
+    # rating courant — on affiche donc le record (libellé "highest").
     try:
         return stats["tactics"]["highest"]["rating"]
     except (KeyError, TypeError):

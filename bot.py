@@ -411,7 +411,7 @@ async def stats(interaction: discord.Interaction, membre: Optional[discord.Membe
     embed.add_field(name="⚡ Rapide", value=rapid_txt)
     embed.add_field(name="🔥 Blitz", value=_fmt_opt(lb.rating_of(s, "chess_blitz")))
     embed.add_field(name="🚀 Bullet", value=_fmt_opt(lb.rating_of(s, "chess_bullet")))
-    embed.add_field(name="🧩 Puzzles", value=_fmt_opt(lb.puzzle_rating(s)))
+    embed.add_field(name="🧩 Puzzles (highest)", value=_fmt_opt(lb.puzzle_rating(s)))
     embed.add_field(
         name="📅 Cette semaine",
         value=f"{d['wins_week']} V / {d['draws_week']} N / {d['losses_week']} D"
